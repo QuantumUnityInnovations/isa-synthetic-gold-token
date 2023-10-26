@@ -1,0 +1,54 @@
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synthetic-gold-token-service
+spec:
+  selector:
+    app: synthetic-gold-token
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synthetic-gold-token-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: synthetic-gold-token
+  template:
+    metadata:
+      labels:
+        app: synthetic-gold-token
+    spec:
+      containers:
+      - name: synthetic-gold-token
+        image: synthetic-gold-token:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+```
